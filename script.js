@@ -22,36 +22,40 @@ export default async function messengerHtmlToJson(inputFile, outputDir = null, d
                 const chatblock = {}
                 const namechild = node.firstElementChild;
                 const datechild = node.childNodes[2];
-                const messagechild = node.childNodes[1];
+                let messagechild
+                if(([...node.childNodes].length) >3){
+                    messagechild = node.childNodes[3];
+                }else{
+                    messagechild = node.childNodes[1];
+                }
+
                 if (namechild != undefined && datechild != undefined && messagechild != undefined && node.children[2] != undefined) {
                     if (typeof node.children[2].textContent === 'string') {
                         if (node.children[2].textContent.trim().length > 5) {
 
-                            if (datechild) {
-                                const date = node.children[2].textContent.trim()
-                                chatblock['date'] = date
-                            }
 
-                            if (namechild) {
-                                const name = namechild.textContent.trim().toLowerCase()
-                                chatblock['name'] = name
-                            }
-                            if (messagechild) {
-                                if (messagechild.querySelector("a")) {
-                                    const href = messagechild.querySelector('a').getAttribute("href")
-                                    if (getMediaType(href) == "link") {
-                                        chatblock['message'] = `website link (${href})`
-                                    } else if (getMediaType(href) == "image") {
-                                        chatblock['message'] = `image`
-                                    } else if (getMediaType(href) == "video") {
-                                        chatblock['message'] = `video`
-                                    }
-                                } else {
-                                    const message = messagechild.textContent.trim()
-                                    chatblock['message'] = message
+                            const date = node.children[2].textContent.trim()
+                            chatblock['date'] = date
+
+
+                            const name = namechild.textContent.trim().toLowerCase()
+                            chatblock['name'] = name
+
+                            
+                            if (messagechild.querySelector("a")) {
+                                const href = messagechild.querySelector('a').getAttribute("href")
+                                if (getMediaType(href) == "link") {
+                                    chatblock['message'] = `website link (${href})`
+                                } else if (getMediaType(href) == "image") {
+                                    chatblock['message'] = `image`
+                                } else if (getMediaType(href) == "video") {
+                                    chatblock['message'] = `video`
                                 }
-
+                            } else {
+                                const message = messagechild.textContent.trim()
+                                chatblock['message'] = message
                             }
+
 
                             dataArray.push(chatblock)
                         }
@@ -59,10 +63,6 @@ export default async function messengerHtmlToJson(inputFile, outputDir = null, d
                     }
 
                 }
-
-
-
-
             }
 
         });
@@ -109,7 +109,6 @@ export default async function messengerHtmlToJson(inputFile, outputDir = null, d
         const jsondata = JSON.stringify(dataArray)
 
 
-
         // Get the original filename without extension
         const fileName = path.basename(inputFile, path.extname(inputFile));
         const inputDir = path.dirname(inputFile);
@@ -131,5 +130,4 @@ export default async function messengerHtmlToJson(inputFile, outputDir = null, d
         console.error('❌ Error:', error);
     }
 }
-
 
